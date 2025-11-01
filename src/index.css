@@ -1,0 +1,147 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Premium Oriental Color Palette */
+    --background: 45 35% 97%;
+    --foreground: 30 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 20% 15%;
+
+    /* Gold & Bronze Primary Colors */
+    --primary: 43 74% 49%;
+    --primary-foreground: 30 20% 15%;
+    
+    --primary-light: 43 74% 65%;
+    --primary-dark: 43 74% 35%;
+
+    /* Elegant Secondary */
+    --secondary: 30 25% 25%;
+    --secondary-foreground: 45 35% 97%;
+
+    --muted: 45 20% 90%;
+    --muted-foreground: 30 15% 45%;
+
+    /* Bronze Accent */
+    --accent: 25 50% 45%;
+    --accent-foreground: 45 35% 97%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 45 35% 97%;
+
+    --border: 43 30% 85%;
+    --input: 43 30% 92%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.75rem;
+    
+    /* Custom Design Tokens */
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(43 74% 65%));
+    --gradient-bronze: linear-gradient(135deg, hsl(25 50% 45%), hsl(30 25% 25%));
+    --gradient-hero: linear-gradient(135deg, hsl(30 25% 25%) 0%, hsl(25 50% 45%) 50%, hsl(43 74% 49%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(45 35% 97%), hsl(43 74% 95%));
+    
+    --shadow-gold: 0 10px 40px -10px hsl(43 74% 49% / 0.4);
+    --shadow-elegant: 0 20px 60px -15px hsl(30 25% 25% / 0.3);
+    --shadow-soft: 0 4px 20px hsl(43 30% 85% / 0.5);
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.2s ease;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 30 20% 10%;
+    --foreground: 45 35% 95%;
+
+    --card: 30 20% 12%;
+    --card-foreground: 45 35% 95%;
+
+    --popover: 30 20% 12%;
+    --popover-foreground: 45 35% 95%;
+
+    --primary: 43 74% 55%;
+    --primary-foreground: 30 20% 10%;
+
+    --secondary: 30 25% 20%;
+    --secondary-foreground: 45 35% 95%;
+
+    --muted: 30 20% 20%;
+    --muted-foreground: 45 15% 60%;
+
+    --accent: 25 50% 50%;
+    --accent-foreground: 45 35% 95%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 45 35% 95%;
+
+    --border: 30 20% 25%;
+    --input: 30 20% 20%;
+    --ring: 43 74% 55%;
+    
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 55%), hsl(43 74% 70%));
+    --gradient-bronze: linear-gradient(135deg, hsl(25 50% 50%), hsl(30 25% 30%));
+    --gradient-hero: linear-gradient(135deg, hsl(30 20% 10%) 0%, hsl(25 50% 30%) 50%, hsl(43 74% 45%) 100%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-primary hover:bg-primary-light text-primary-foreground font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-gold)];
+  }
+  
+  .btn-bronze {
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md transition-all duration-300;
+  }
+  
+  .card-elegant {
+    @apply bg-card border border-border shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all duration-500;
+  }
+  
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-primary via-primary-light to-primary bg-clip-text text-transparent;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
