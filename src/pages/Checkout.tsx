@@ -10,6 +10,29 @@ import { getCart, clearCart } from "@/lib/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Funcție pentru trimitere email
+const sendOrder = async (formData: any, items: any[], orderNumber: string) => {
+  try {
+    await fetch("http://localhost:5000/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderNumber,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        items, // lista produselor cu imagini
+        total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        notes: formData.notes || "Fără notițe",
+      }),
+    });
+  } catch (error) {
+    console.error("Eroare la trimiterea emailului:", error);
+    throw error;
+  }
+};
+
 const Checkout = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState(getCart());
@@ -37,6 +60,7 @@ const Checkout = () => {
     try {
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+      // Salvează comanda în Supabase
       const { data, error } = await supabase
         .from("orders")
         .insert([{
@@ -45,7 +69,7 @@ const Checkout = () => {
           customer_email: formData.email,
           customer_phone: formData.phone,
           address: formData.address,
-          items: cart.items as any,
+          items: cart.items,
           total: cart.total,
           notes: formData.notes || null,
           status: "în procesare",
@@ -55,26 +79,8 @@ const Checkout = () => {
 
       if (error) throw error;
 
-      // Send email via Formspree
-      const formspreeId = "xeopkqea";
-      const itemsList = cart.items.map(item => `${item.name} x ${item.quantity} - ${(item.price * item.quantity).toFixed(2)} RON`).join('\n');
-      
-      await fetch(`https://formspree.io/f/${formspreeId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subject: `Comandă nouă #${orderNumber} - Oriental Essence`,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          items: itemsList,
-          total: `${cart.total.toFixed(2)} RON`,
-          notes: formData.notes || 'Fără notițe',
-        }),
-      });
+      // Trimite email cu produse și imagini
+      await sendOrder(formData, cart.items, orderNumber);
 
       clearCart();
       window.dispatchEvent(new Event('cartUpdated'));
