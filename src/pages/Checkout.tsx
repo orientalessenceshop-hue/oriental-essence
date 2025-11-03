@@ -10,29 +10,6 @@ import { getCart, clearCart } from "@/lib/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Funcție pentru trimitere email
-const sendOrder = async (formData: any, items: any[], orderNumber: string) => {
-  try {
-    await fetch("http://localhost:5000/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderNumber,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        items, // lista produselor cu imagini
-        total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        notes: formData.notes || "Fără notițe",
-      }),
-    });
-  } catch (error) {
-    console.error("Eroare la trimiterea emailului:", error);
-    throw error;
-  }
-};
-
 const Checkout = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState(getCart());
@@ -47,9 +24,7 @@ const Checkout = () => {
 
   useEffect(() => {
     const currentCart = getCart();
-    if (currentCart.items.length === 0) {
-      navigate("/cart");
-    }
+    if (currentCart.items.length === 0) navigate("/cart");
     setCart(currentCart);
   }, [navigate]);
 
@@ -60,8 +35,7 @@ const Checkout = () => {
     try {
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-      // Salvează comanda în Supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("orders")
         .insert([{
           order_number: orderNumber,
@@ -73,17 +47,28 @@ const Checkout = () => {
           total: cart.total,
           notes: formData.notes || null,
           status: "în procesare",
-        }])
-        .select()
-        .single();
+        }]);
 
       if (error) throw error;
 
-      // Trimite email cu produse și imagini
-      await sendOrder(formData, cart.items, orderNumber);
+      // Trimite emailul către client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          items: cart.items,
+          total: cart.total,
+          notes: formData.notes || "Fără notițe",
+        }),
+      });
 
       clearCart();
-      window.dispatchEvent(new Event('cartUpdated'));
+      window.dispatchEvent(new Event("cartUpdated"));
       navigate(`/order-confirmation/${orderNumber}`);
       toast.success("Comandă plasată cu succes!");
     } catch (error) {
@@ -97,11 +82,9 @@ const Checkout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-8">Finalizează Comanda</h1>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-6">
@@ -115,7 +98,6 @@ const Checkout = () => {
                     placeholder="Ion Popescu"
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="email">Email *</Label>
                   <Input
@@ -127,7 +109,6 @@ const Checkout = () => {
                     placeholder="ion.popescu@email.com"
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="phone">Telefon *</Label>
                   <Input
@@ -139,7 +120,6 @@ const Checkout = () => {
                     placeholder="0712345678"
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="address">Adresă Completă *</Label>
                   <Textarea
@@ -151,7 +131,6 @@ const Checkout = () => {
                     rows={4}
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="notes">Notițe pentru comandă (opțional)</Label>
                   <Textarea
@@ -162,20 +141,17 @@ const Checkout = () => {
                     rows={3}
                   />
                 </div>
-
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <h3 className="font-semibold mb-2">Plată Ramburs</h3>
                   <p className="text-sm text-muted-foreground">
                     Plata se va face la livrare, în numerar sau cu cardul, direct curierului.
                   </p>
                 </div>
-
                 <Button type="submit" size="lg" className="w-full btn-gold" disabled={loading}>
                   {loading ? "Se procesează..." : "Plasează Comanda"}
                 </Button>
               </form>
             </div>
-
             <div className="lg:col-span-1">
               <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
                 <h2 className="text-2xl font-bold mb-6">Produse Comandate</h2>
@@ -209,7 +185,6 @@ const Checkout = () => {
           </div>
         </div>
       </section>
-
       <Footer />
     </div>
   );
