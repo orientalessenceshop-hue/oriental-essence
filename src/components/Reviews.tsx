@@ -19,14 +19,7 @@ interface ReviewsProps {
   productId: string;
 }
 
-/** Mapare productId -> numar fake cerut */
-const FAKE_COUNTS: Record<string, number> = {
-  "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
-  "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
-  "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19,
-  "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32,
-};
-
+// Nume românești
 const romanianNames = [
   "Ana", "Elena", "Ioana", "Maria", "Cristina", "Andreea",
   "Gabriel", "Mihai", "Alexandru", "Vlad", "Radu", "Bogdan",
@@ -35,68 +28,128 @@ const romanianNames = [
   "Vasile", "Nicolae", "Larisa", "Marius"
 ];
 
-const shortComments = [
-  "Excelent! ⭐️",
-  "Foarte bun, persistă mult.",
-  "Îmi place aroma 😊",
-  "Perfect pentru seară.",
-  "Calitate super.",
-  "Merge foarte bine ca și cadou 🎁",
-  "Arome complexe, foarte plăcut.",
-  "Am primit multe complimente.",
-];
-
-const longComments = [
-  "Am folosit acest parfum de câteva săptămâni și pot spune că persistența este excepțională. Notele de bază sunt calde și rămân mult timp pe piele. Recomand cu încredere! 🌟",
-  "Mirosul evoluează frumos în timp — la început e ușor condimentat, apoi se transformă într-o bază lemnoasă care persistă ore. Ambalajul este și el foarte elegant.",
-  "Am cumpărat pentru cadou, destinatarul a fost foarte încântat. Raport calitate-preț foarte bun, o recomand celor care vor ceva special.",
-  "Arată premium, se simte premium. Notele de început sunt surprinzătoare, apoi devine cald–ambrat. L-am purtat la o seară specială și am primit foarte multe complimente.",
-  "Este parfumul meu preferat din această colecție. Persistență foarte bună, proiecție echilibrată. Recomand pentru serile reci.",
-];
-
-const randomDateBetween = (startYear = 2023, endYear = 2025) => {
-  const start = new Date(startYear, 0, 1).getTime();
-  const end = new Date(endYear, 11, 31).getTime();
-  const ts = Math.floor(Math.random() * (end - start)) + start;
-  return new Date(ts).toISOString();
+// Comentarii variate
+const commentsSet: Record<string, string[]> = {
+  // Produs 1 - 17 recenzii
+  "product-1": [
+    "Excelent! Aroma rămâne toată ziua. 🌸",
+    "Foarte elegant și rafinat, primești multe complimente! 👌",
+    "Perfect pentru seară, aroma subtilă dar persistentă.",
+    "Un parfum care merită fiecare leu! 😍",
+    "Calitate premium, recomand cu drag!",
+    "Note delicate și plăcute, persistent timp îndelungat.",
+    "Mi-a plăcut mult, aroma devine mai complexă cu timpul.",
+    "Superb! Nu mă așteptam la persistență atât de bună.",
+    "Recomand pentru serile speciale, elegant și rafinat.",
+    "Miros plăcut, persistent, cadou ideal 🎁",
+    "Note complexe și echilibrate, foarte mulțumit.",
+    "Se simte luxos, persistent și elegant, ideal pentru întâlniri.",
+    "Perfect pentru zi și seară, delicat și persistent.",
+    "Foarte plăcut și echilibrat, îl voi recumpăra.",
+    "Notele de vârf sunt fresh, baza e lemnoasă.",
+    "Un parfum premium cu adevărat, elegant.",
+    "Perfect pentru propria colecție. 🌟",
+  ],
+  // Produs 2 - 22 recenzii
+  "product-2": [
+    "Aromă intensă și sofisticată. 😍",
+    "Un parfum minunat, recomand cu drag!",
+    "Persistență excelentă pe parcursul zilei.",
+    "Note fine, delicate și foarte plăcute.",
+    "Foarte bun pentru evenimente speciale!",
+    "Îl folosesc zilnic, aroma rămâne fresh.",
+    "Mi-a depășit așteptările, calitate premium.",
+    "Super elegant, primești multe complimente.",
+    "Perfect pentru cadou sau pentru tine.",
+    "Miros delicat dar persistent, foarte plăcut.",
+    "Notele lemnoase se simt minunat. 🌿",
+    "Calitate superioară, l-am recomandat prietenilor.",
+    "Excelent pentru întâlniri și ocazii speciale.",
+    "Aroma se schimbă frumos pe parcursul zilei.",
+    "Foarte rafinat și elegant, persistent.",
+    "Se simte de lux, aroma bogată și persistentă.",
+    "Recomand cu încredere, ideal pentru orice ocazie.",
+    "Note de vârf fresh, baza lemnoasă, perfect.",
+    "Foarte bun, l-am cumpărat deja a doua oară.",
+    "Parfum premium, elegant și persistent.",
+    "Ideal pentru serile speciale și evenimente.",
+    "Aromă echilibrată, nu deranjantă, plăcută.",
+  ],
+  // Produs 3 - 19 recenzii
+  "product-3": [
+    "Foarte bun, persistent și elegant.",
+    "Îl folosesc zilnic, aroma rămâne fresh.",
+    "Perfect pentru zi și seară, subtil și persistent.",
+    "Super elegant, aroma plăcută și delicată.",
+    "Un parfum premium, aroma bogată și persistentă.",
+    "Note de vârf fresh, baza lemnoasă, minunat.",
+    "Recomand pentru cadou sau pentru tine. 🎁",
+    "Excelent pentru evenimente speciale și întâlniri.",
+    "Calitate superioară, mi-a depășit așteptările.",
+    "Foarte rafinat și elegant, persistent toată ziua.",
+    "Aroma se dezvoltă frumos pe piele, persistentă.",
+    "Perfect pentru propria colecție sau cadou.",
+    "Se simte de lux, foarte plăcut și persistent.",
+    "Note delicate, plăcute, echilibrate.",
+    "Miros subtil dar persistent, aroma minunată.",
+    "Recomand cu drag, ideal pentru ocazii speciale.",
+    "Foarte bun, elegant și persistent.",
+    "Parfum premium, aroma rafinată și complexă.",
+    "Ideal pentru serile speciale și ocazii elegante.",
+  ],
+  // Produs 4 - 32 recenzii
+  "product-4": [
+    "Un parfum excepțional, aroma persistentă.",
+    "Foarte elegant și rafinat, recomand cu drag!",
+    "Perfect pentru seară, notele sunt complexe.",
+    "Calitate premium, persistent timp îndelungat.",
+    "Superb, primești multe complimente! 🌸",
+    "Mi-a plăcut mult, aroma devine mai complexă.",
+    "Foarte plăcut, subtile și elegante note.",
+    "Perfect pentru cadou sau pentru colecție. 🎁",
+    "Note fine, delicate și plăcute.",
+    "Excelent pentru evenimente speciale.",
+    "Persistență extraordinară pe parcursul zilei.",
+    "Se simte luxos, elegant și rafinat.",
+    "Notele de vârf sunt fresh, baza lemnoasă.",
+    "Foarte rafinat, aroma persistentă și plăcută.",
+    "Recomand pentru serile speciale și întâlniri.",
+    "Aromă bogată și persistentă, perfectă.",
+    "Ideal pentru zi și seară, subtil și elegant.",
+    "Foarte bun, elegant și rafinat, persistent.",
+    "Parfum premium, calitate superioară.",
+    "Note delicate și echilibrate, plăcute.",
+    "Miros subtil, persistent, foarte plăcut.",
+    "Recomand cu drag, aroma minunată.",
+    "Perfect pentru propria colecție sau cadou. 🌟",
+    "Excelent, persistent, aroma complexă.",
+    "Foarte rafinat, primești multe complimente.",
+    "Calitate premium, persistent și elegant.",
+    "Note subtile, plăcute, delicate.",
+    "Un parfum care impresionează prin aroma sa.",
+    "Perfect pentru serile speciale și ocazii.",
+    "Foarte elegant, aroma persistentă și rafinată.",
+    "Superb, ideal pentru zi și seară.",
+    "Recomand cu încredere, persistent și elegant.",
+  ],
 };
 
+// Generează recenzii fake unice cu date random
 const makeFakeReviewsFor = (productId: string): Review[] => {
-  const count = FAKE_COUNTS[productId] ?? 8;
-  const res: Review[] = [];
-  const usedNames = new Set<string>();
-
-  for (let i = 0; i < count; i++) {
-    // alege un nume romanesc unic (daca se termina, permite repetitii)
-    let name = romanianNames[Math.floor(Math.random() * romanianNames.length)];
-    // dacă același nume s-a folosit deja prea des, adaugăm un prenume scurt
-    if (usedNames.has(name)) {
-      const extra = romanianNames[(i + 7) % romanianNames.length];
-      name = `${name} ${extra.charAt(0)}.`;
-    }
-    usedNames.add(name);
-
-    // comentariu variat: uneori scurt, uneori lung, uneori combinat + emoji
-    const useLong = Math.random() < 0.4;
-    const comment = useLong
-      ? longComments[Math.floor(Math.random() * longComments.length)]
-      : shortComments[Math.floor(Math.random() * shortComments.length)];
-
-    const rating = +(Math.random() * (5 - 4) + 4).toFixed(1); // 4.0 - 5.0
-
-    res.push({
-      id: `fake-${productId}-${i + 1}`,
+  const selectedComments = commentsSet[productId] || [];
+  return selectedComments.map((c, i) => {
+    const name = romanianNames[i % romanianNames.length] + (i >= romanianNames.length ? ` ${i}` : "");
+    const rating = +(Math.random() * (5 - 4) + 4).toFixed(1);
+    const created_at = new Date(2023 + Math.floor(Math.random() * 3), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString();
+    return {
+      id: `fake-${productId}-${i}`,
       product_id: productId,
       name,
       rating,
-      comment,
-      created_at: randomDateBetween(2023, 2025),
-    });
-  }
-
-  // sortăm descendent (cele mai noi primele)
-  res.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-  return res;
+      comment: c,
+      created_at,
+    };
+  }).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 };
 
 const Reviews = ({ productId }: ReviewsProps) => {
@@ -109,32 +162,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      // recenziile reale din DB
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("product_id", productId)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Eroare preluare recenzii reale:", error);
-      }
-
-      const real = (data || []) as Review[];
-      // generăm recenziile fake pentru acest produs
-      const fakes = makeFakeReviewsFor(productId);
-
-      // combinăm: fake (ca exemplu) + reale (cele reale la final, astfel reale apar primele la afișare dacă au date mai noi)
-      // dar vrem ca reale să fie vizibile totuși — punem reale înainte (ca să apară cele recente reale în top)
-      const combined = [...real, ...fakes];
-
-      // sortăm după created_at descendent (cele mai noi primele)
-      combined.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-
+      const { data } = await supabase.from("reviews").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+      const real: Review[] = data || [];
+      const fake = makeFakeReviewsFor(productId);
+      const combined = [...real, ...fake].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
       setReviews(combined);
     } catch (err) {
       console.error(err);
-      // fallback: doar fake
       setReviews(makeFakeReviewsFor(productId));
     } finally {
       setLoading(false);
@@ -143,7 +177,6 @@ const Reviews = ({ productId }: ReviewsProps) => {
 
   useEffect(() => {
     fetchReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   const handleSubmit = async () => {
@@ -151,24 +184,12 @@ const Reviews = ({ productId }: ReviewsProps) => {
       toast.error("Completează toate câmpurile!");
       return;
     }
-
     try {
-      const { data, error } = await supabase
-        .from("reviews")
-        .insert([{ product_id: productId, name: name.trim(), rating, comment: comment.trim() }]);
-
-      if (error) {
-        console.error("Eroare inserare review:", error);
-        toast.error("A apărut o eroare. Încearcă din nou.");
-        return;
-      }
-
-      toast.success("Mulțumim! Recenzia ta a fost adăugată.");
+      await supabase.from("reviews").insert([{ product_id: productId, name: name.trim(), rating, comment: comment.trim() }]);
+      toast.success("Recenzia ta a fost adăugată!");
       setName("");
       setComment("");
       setRating(5);
-
-      // reîmprospătăm lista (acum include recenzia reală)
       fetchReviews();
     } catch (err) {
       console.error(err);
@@ -179,34 +200,16 @@ const Reviews = ({ productId }: ReviewsProps) => {
   return (
     <div className="mt-12">
       <h3 className="text-2xl font-bold mb-4">Recenzii</h3>
-
-      {/* Form adăugare recenzie */}
       <div className="mb-6 p-4 border rounded-lg bg-muted/20">
-        <Input
-          placeholder="Nume"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mb-2"
-        />
-        <Textarea
-          placeholder="Comentariu"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="mb-2"
-        />
+        <Input placeholder="Nume" value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
+        <Textarea placeholder="Comentariu" value={comment} onChange={(e) => setComment(e.target.value)} className="mb-2" />
         <div className="flex items-center space-x-2 mb-2">
           {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-              onClick={() => setRating(star)}
-            />
+            <Star key={star} className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} onClick={() => setRating(star)} />
           ))}
         </div>
         <Button onClick={handleSubmit}>Adaugă Recenzie</Button>
       </div>
-
-      {/* Lista recenziilor */}
       {loading ? (
         <p className="text-muted-foreground">Se încarcă recenziile...</p>
       ) : reviews.length === 0 ? (
@@ -217,10 +220,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
             <div key={r.id} className="p-4 border rounded-lg bg-white">
               <div className="flex items-center mb-2">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-                  />
+                  <Star key={star} className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
                 ))}
                 <span className="ml-2 text-sm font-semibold">{r.name}</span>
                 <span className="ml-auto text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
