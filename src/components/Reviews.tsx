@@ -130,9 +130,18 @@ const commentsSet: Record<string, string[]> = {
   ],
 };
 
+// Mapare ID real -> key din commentsSet
+const productIdToFakeKey: Record<string, string> = {
+  "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": "product-1",
+  "03b05485-1428-4a9b-9fcb-a58e60774bd3": "product-2",
+  "345e6ebb-45f4-47be-b13e-e971b9f6121b": "product-3",
+  "46a8f994-7a21-48c4-acd2-5dd97e06d544": "product-4",
+};
+
 // Generează recenzii fake unice cu date random
 const makeFakeReviewsFor = (productId: string): Review[] => {
-  const selectedComments = commentsSet[productId] || [];
+  const fakeKey = productIdToFakeKey[productId] || "product-1";
+  const selectedComments = commentsSet[fakeKey] || [];
   return selectedComments.map((c, i) => {
     const name = romanianNames[i % romanianNames.length] + (i >= romanianNames.length ? ` ${i}` : "");
     const rating = +(Math.random() * (5 - 4) + 4).toFixed(1);
@@ -181,11 +190,6 @@ const Reviews = ({ productId }: ReviewsProps) => {
 
   useEffect(() => {
     fetchReviews();
-
-    // 🔹 Listen for global reviewAdded events to refresh reviews
-    const handleReviewAdded = () => fetchReviews();
-    window.addEventListener("reviewAdded", handleReviewAdded);
-    return () => window.removeEventListener("reviewAdded", handleReviewAdded);
   }, [productId]);
 
   const handleSubmit = async () => {
@@ -205,9 +209,6 @@ const Reviews = ({ productId }: ReviewsProps) => {
       setComment("");
       setRating(5);
       fetchReviews();
-
-      // 🔹 Trigger global event so ProductCard updates count
-      window.dispatchEvent(new Event("reviewAdded"));
     } catch (err) {
       console.error(err);
       toast.error("Eroare la trimitere.");
