@@ -1,95 +1,95 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ShoppingCart, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Star, ShoppingCart } from "lucide-react";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
 
 interface ProductCardProps {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  category: string;
-  reviewsCount?: number;
-  rating?: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    stock: number;
+    category: string;
+    reviewCount: number; // inițial
+    reviewAvg: number;   // inițial
+  };
 }
 
-const ProductCard = ({
-  id,
-  name,
-  description,
-  price,
-  image_url,
-  category,
-  reviewsCount = 0,
-  rating,
-}: ProductCardProps) => {
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addToCart({ id, name, price, image_url });
-    toast.success(`${name} adăugat în coș!`);
+const ProductCard = ({ product }: ProductCardProps) => {
+  const [reviewCount, setReviewCount] = useState(product.reviewCount);
+  const [reviewAvg, setReviewAvg] = useState(product.reviewAvg);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent<{ productId: string; count: number; avg: number }>;
+      if (customEvent.detail.productId === product.id) {
+        setReviewCount(customEvent.detail.count);
+        setReviewAvg(customEvent.detail.avg);
+      }
+    };
+
+    window.addEventListener("reviewsUpdated", handler);
+    return () => window.removeEventListener("reviewsUpdated", handler);
+  }, [product.id]);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+    });
+    toast.success(`${product.name} adăugat în coș!`);
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  // Dacă nu avem rating (din props), generăm unul vizibil plăcut (fallback)
-  const displayRating = rating ?? +(Math.random() * (5 - 4) + 4).toFixed(1);
-  const displayReviewsCount = reviewsCount ?? Math.floor(Math.random() * 20 + 5);
-
-  const fullStars = Math.floor(displayRating);
-  const halfStar = displayRating - fullStars >= 0.5;
-
   return (
-    <Link to={`/product/${id}`}>
-      <Card className="card-elegant h-full overflow-hidden group cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
-        <div className="aspect-square overflow-hidden relative flex items-center justify-center bg-white">
-          <img
-            src={image_url || "/placeholder.svg"}
-            alt={name}
-            className="object-contain w-full h-full p-4 transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute top-2 right-2 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-            {category}
-          </div>
+    <div className="bg-white rounded-2xl shadow-lg p-4 flex flex-col">
+      <Link to={`/product/${product.id}`} className="mb-4">
+        <img
+          src={product.image_url || "/placeholder.svg"}
+          alt={product.name}
+          className="w-full h-48 object-contain rounded-lg transition-transform hover:scale-105"
+        />
+      </Link>
+
+      <div className="flex flex-col flex-1">
+        <span className="text-sm text-accent font-semibold mb-1">{product.category}</span>
+        <Link to={`/product/${product.id}`}>
+          <h2 className="text-lg font-bold mb-2">{product.name}</h2>
+        </Link>
+
+        <div className="flex items-center mb-2">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star
+              key={s}
+              className={`h-4 w-4 ${
+                reviewAvg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+              }`}
+            />
+          ))}
+          <span className="text-xs text-muted-foreground ml-2">{reviewCount} recenzii</span>
         </div>
 
-        <CardContent className="p-6">
-          <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-            {name}
-          </h3>
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-4">{description}</p>
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center gap-1">
-                {[...Array(fullStars)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                ))}
-                {halfStar && <Star className="h-4 w-4 text-yellow-500 fill-yellow-300" />}
-              </div>
-              <div className="text-sm font-semibold">{displayRating}</div>
-              <div className="text-muted-foreground text-sm">({displayReviewsCount})</div>
-            </div>
-
-            <div className="text-2xl font-bold text-primary transition-colors group-hover:text-yellow-600">
-              {price} RON
-            </div>
-          </div>
-        </CardContent>
-
-        <CardFooter className="p-6 pt-0">
-          <Button
+        <div className="mt-auto flex items-center justify-between">
+          <span className="text-xl font-bold text-primary">{product.price} RON</span>
+          <button
             onClick={handleAddToCart}
-            className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-semibold rounded-xl shadow-md transition-all duration-300 flex items-center justify-center"
-            size="lg"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center"
+            disabled={product.stock === 0}
           >
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Adaugă în coș
-          </Button>
-        </CardFooter>
-      </Card>
-    </Link>
+            Adaugă
+          </button>
+        </div>
+
+        {product.stock === 0 && (
+          <p className="text-sm text-destructive mt-1">Stoc epuizat</p>
+        )}
+      </div>
+    </div>
   );
 };
 
