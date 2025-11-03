@@ -181,6 +181,11 @@ const Reviews = ({ productId }: ReviewsProps) => {
 
   useEffect(() => {
     fetchReviews();
+
+    // 🔹 Listen for global reviewAdded events to refresh reviews
+    const handleReviewAdded = () => fetchReviews();
+    window.addEventListener("reviewAdded", handleReviewAdded);
+    return () => window.removeEventListener("reviewAdded", handleReviewAdded);
   }, [productId]);
 
   const handleSubmit = async () => {
@@ -200,6 +205,9 @@ const Reviews = ({ productId }: ReviewsProps) => {
       setComment("");
       setRating(5);
       fetchReviews();
+
+      // 🔹 Trigger global event so ProductCard updates count
+      window.dispatchEvent(new Event("reviewAdded"));
     } catch (err) {
       console.error(err);
       toast.error("Eroare la trimitere.");

@@ -1,9 +1,19 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+// 🔹 Pentru recenzii fake (să aibă aceleași numere cu cele din Reviews)
+const fakeReviewCounts: Record<string, number> = {
+  "product-1": 17,
+  "product-2": 22,
+  "product-3": 19,
+  "product-4": 32,
+};
 
 interface ProductCardProps {
   id: string;
@@ -26,6 +36,48 @@ const ProductCard = ({
   reviewsCount = 0,
   rating,
 }: ProductCardProps) => {
+  const [dynamicReviewsCount, setDynamicReviewsCount] = useState<number>(reviewsCount);
+  const [averageRating, setAverageRating] = useState<number | null>(rating || null);
+
+  // 🔹 Obținem recenzii reale și le combinăm cu cele fake
+  useEffect(() => {
+    const fetchReviewStats = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("rating", { count: "exact" })
+          .eq("product_id", id);
+
+        if (error) throw error;
+
+        const realCount = data?.length || 0;
+        const fakeCount = fakeReviewCounts[id] ?? 0;
+
+        // 🔸 Calculăm rating-ul mediu (real + fake)
+        const realRatings = data?.map((r: any) => Number(r.rating)) || [];
+        const avgReal = realRatings.length
+          ? realRatings.reduce((a, b) => a + b, 0) / realRatings.length
+          : 0;
+        const avgFake = Math.random() * (5 - 4) + 4;
+        const avg = (avgReal + avgFake) / (realRatings.length ? 2 : 1);
+
+        setDynamicReviewsCount(realCount + fakeCount);
+        setAverageRating(Number(avg.toFixed(1)));
+      } catch (err) {
+        console.error("Error fetching review stats:", err);
+        setDynamicReviewsCount(fakeReviewCounts[id] ?? 0);
+        setAverageRating(rating ?? 4.5);
+      }
+    };
+
+    fetchReviewStats();
+
+    // 🔄 Ascultăm actualizările recenziilor
+    const handleReviewAdded = () => fetchReviewStats();
+    window.addEventListener("reviewAdded", handleReviewAdded);
+    return () => window.removeEventListener("reviewAdded", handleReviewAdded);
+  }, [id, rating]);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     addToCart({ id, name, price, image_url });
@@ -33,7 +85,7 @@ const ProductCard = ({
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  const displayRating = rating ?? +(Math.random() * (5 - 4) + 4).toFixed(1);
+  const displayRating = averageRating ?? +(Math.random() * (5 - 4) + 4).toFixed(1);
   const fullStars = Math.floor(displayRating);
   const halfStar = displayRating - fullStars >= 0.5;
 
@@ -56,15 +108,19 @@ const ProductCard = ({
             {name}
           </h3>
           <p className="text-muted-foreground text-sm line-clamp-2 mb-4">{description}</p>
+
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-1">
               {[...Array(fullStars)].map((_, i) => (
                 <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               ))}
               {halfStar && <Star className="h-4 w-4 text-yellow-500 fill-yellow-300" />}
-              <span className="text-sm font-semibold">{displayRating}</span>
-              <span className="text-muted-foreground text-sm">({reviewsCount})</span>
+              <span className="text-sm font-semibold">{displayRating.toFixed(1)}</span>
+              <span className="text-muted-foreground text-sm">
+                ({dynamicReviewsCount})
+              </span>
             </div>
+
             <span className="text-2xl font-bold text-primary transition-colors group-hover:text-yellow-600">
               {price} RON
             </span>
