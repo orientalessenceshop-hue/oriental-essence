@@ -11,13 +11,21 @@ const Index = () => {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Recenzii simulate
+  const simulatedReviews: { [key: string]: { count: number; rating: number } } = {
+    "03b05485-1428-4a9b-9fcb-a58e60774bd3": { count: 17, rating: 4.8 },
+    "46a8f994-7a21-48c4-acd2-5dd97e06d544": { count: 22, rating: 4.9 },
+    "345e6ebb-45f4-47be-b13e-e971b9f6121b": { count: 19, rating: 4.7 },
+    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": { count: 32, rating: 4.85 },
+  };
+
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, reviews(*)") // adăugăm recenziile
+        .select("*")
         .eq("featured", true)
-        .limit(4);
+        .limit(4); // afișăm 4 produse
 
       if (error) {
         console.error("Error fetching featured products:", error);
@@ -109,14 +117,21 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="transition-transform transform hover:scale-105 duration-300"
-                >
-                  <ProductCard {...product} />
-                </div>
-              ))}
+              {featuredProducts.map((product) => {
+                const rev = simulatedReviews[product.id] || { count: 0, rating: 4.7 };
+                return (
+                  <div
+                    key={product.id}
+                    className="transition-transform transform hover:scale-105 duration-300"
+                  >
+                    <ProductCard
+                      {...product}
+                      reviewsCount={rev.count}
+                      rating={rev.rating}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
 
