@@ -29,7 +29,7 @@ const OrderConfirmation = () => {
                   <ul className="space-y-2 text-muted-foreground">
                     <li>✓ Ai primit un email de confirmare cu detaliile comenzii</li>
                     <li>✓ Te vom contacta telefonic pentru confirmarea livrării</li>
-                    <li>✓ Comanda va fi livrată în 24-48 ore</li>
+                    <li>✓ Comanda va fi livrată în 5-7 zile</li>
                     <li>✓ Plata se face ramburs, la livrare</li>
                   </ul>
                 </div>

@@ -17,7 +17,7 @@ const Index = () => {
         .from("products")
         .select("*")
         .eq("featured", true)
-        .limit(3);
+        .limit(4); // afișăm 4 produse
 
       if (error) {
         console.error("Error fetching featured products:", error);
@@ -108,16 +108,20 @@ const Index = () => {
               <p className="text-muted-foreground">Se încarcă produsele...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
+                <div
+                  key={product.id}
+                  className="transition-transform transform hover:scale-105 duration-300"
+                >
+                  <ProductCard {...product} />
+                </div>
               ))}
             </div>
           )}
 
           <div className="text-center mt-12">
             <Link to="/catalog">
-              {/* ✅ Buton modificat (fără variant outline) */}
               <Button size="lg" className="btn-bronze text-lg px-8 py-6">
                 Vezi Toate Produsele
                 <ArrowRight className="ml-2 h-5 w-5" />

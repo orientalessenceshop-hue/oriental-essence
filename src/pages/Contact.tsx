@@ -21,25 +21,22 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      const formspreeId = "PUT_YOUR_FORMSPREE_ID_HERE";
-      
-      await fetch(`https://formspree.io/f/${formspreeId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subject: `Mesaj contact de la ${formData.name}`,
-          name: formData.name,
-          email: formData.email,
-          message: formData.message,
-        }),
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
-      toast.success("Mesaj trimis cu succes! Te vom contacta în curând.");
-      setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      toast.error("A apărut o eroare. Te rugăm să încerci din nou.");
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Mesajul a fost trimis cu succes!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        toast.error("Eroare la trimiterea mesajului.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Eroare la trimiterea mesajului.");
     } finally {
       setLoading(false);
     }
