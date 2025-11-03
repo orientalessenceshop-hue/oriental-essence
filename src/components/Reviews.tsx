@@ -17,6 +17,7 @@ interface Review {
 
 interface ReviewsProps {
   productId: string;
+  onReviewsChange?: (count: number, avg: number) => void; // callback pentru Product.tsx
 }
 
 // Nume românești
@@ -28,106 +29,105 @@ const romanianNames = [
   "Vasile", "Nicolae", "Larisa", "Marius"
 ];
 
-// Comentarii naturale
+// Comentarii naturale (revizuite pentru a părea mai reale)
 const commentsSet: Record<string, string[]> = {
   "product-1": [
-    "Mirosul e exact ce mă așteptam, subtil dar persistent.",
-    "Foarte plăcut, primesc complimente de fiecare dată când îl port.",
-    "Parfum de calitate, recomand pentru serile speciale.",
-    "Notele de vârf sunt delicate, iar baza e lemnoasă și elegantă.",
-    "Îmi place mult cum se simte pe piele pe parcursul zilei.",
-    "Ambalaj elegant și parfum rafinat, chiar merită.",
-    "L-am purtat la întâlniri și am primit reacții bune.",
-    "Persistență bună, aroma evoluează frumos.",
-    "Perfect pentru cadou, cu siguranță îl voi recumpăra.",
-    "Se simte luxos și nu deranjează pe nimeni din jur.",
-    "Un parfum care te face să te simți sofisticat.",
-    "Notele devin mai complexe după câteva ore.",
-    "Delicat dar suficient de prezent pentru a fi remarcat.",
-    "Miros fresh la început, apoi rămâne elegant.",
-    "Foarte echilibrat, nu prea puternic, nu prea slab.",
-    "Se simte premium și elegant, exact cum trebuie.",
-    "Un parfum care merită să fie în colecția ta.",
+    "Aroma se simte minunat pe tot parcursul zilei, îmi place foarte mult.",
+    "Foarte elegant și persistent, l-am primit cadou și mi-a plăcut.",
+    "Miros plăcut, dar nu deranjează pe nimeni, îl recomand.",
+    "Notele se schimbă subtil pe parcursul zilei, foarte rafinat.",
+    "Calitate premium, se simte luxos și persistent.",
+    "Un parfum plăcut, îl port zilnic fără probleme.",
+    "Mi-a depășit așteptările, aroma rămâne mult timp.",
+    "Foarte bun pentru serile speciale, recomand.",
+    "Aromă discretă, dar elegantă și persistentă.",
+    "Un parfum pe care l-aș recumpăra oricând.",
+    "Notele sunt bine echilibrate și plăcute.",
+    "Se simte luxos, aroma persistentă și rafinată.",
+    "Perfect pentru zi și seară, nu deranjează pe nimeni.",
+    "Mi-a plăcut foarte mult, aroma se dezvoltă frumos pe piele.",
+    "Un parfum premium pentru colecția mea.",
+    "Notele de vârf sunt fresh, baza lemnoasă se simte elegant.",
+    "Este elegant, persistent și se simte de calitate."
   ],
   "product-2": [
-    "Aroma e intensă, perfectă pentru evenimente speciale.",
-    "Se simte sofisticat și elegant, exact ce căutam.",
-    "Persistența este foarte bună, durează toată ziua.",
-    "Notele lemnoase sunt echilibrate, aroma plăcută.",
-    "Îl folosesc zilnic și nu m-am săturat de el.",
-    "Perfect cadou pentru cineva care apreciază parfumul fin.",
-    "Mirosul evoluează frumos pe piele.",
-    "Primul meu parfum de la Lattafa, foarte mulțumit.",
-    "Se simte de lux fără să fie prea puternic.",
-    "Foarte bun pentru serile speciale, recomand cu drag.",
-    "Notele de vârf sunt fresh și atrăgătoare.",
-    "Miros subtil dar persistent, se simte calitativ.",
-    "Primești complimente fără să ceri, aroma e minunată.",
-    "Parfum premium, elegant, nu deranjează pe nimeni.",
-    "Ideal pentru ocazii speciale și întâlniri elegante.",
-    "Perfect echilibrat, nu prea puternic, nu prea slab.",
-    "Foarte rafinat și de calitate, se simte luxos.",
-    "Mirosul rămâne pe haine fără să fie agresiv.",
-    "L-am recomandat prietenilor și lor le-a plăcut.",
-    "Parfum care inspiră încredere și eleganță.",
-    "Notele subtile fac aroma mai complexă.",
-    "Ideal pentru colecția mea, cu siguranță îl recumpăr.",
+    "Aroma se simte sofisticată și elegantă.",
+    "Persistență foarte bună, se simte fresh tot timpul.",
+    "Foarte plăcut și rafinat, l-am primit complimente.",
+    "Perfect pentru cadou, aroma nu deranjează.",
+    "Notele sunt delicate și echilibrate, îl recomand.",
+    "Îl folosesc zilnic, aroma rămâne constantă.",
+    "Super elegant, se simte de lux și rafinat.",
+    "Foarte bun pentru evenimente speciale, recomand.",
+    "Parfum premium, persistent și rafinat.",
+    "Ideal pentru serile speciale, aroma discretă.",
+    "Notele lemnoase se simt plăcut, persistent.",
+    "Foarte elegant, perfect pentru întâlniri.",
+    "Recomand cu încredere, aroma este echilibrată.",
+    "Un parfum rafinat, persistent și plăcut.",
+    "Se simte premium și elegant, îl voi recumpăra.",
+    "Note de vârf fresh, baza lemnoasă se simte bine.",
+    "Foarte bun, aroma subtilă dar persistentă.",
+    "Ideal pentru cadou sau pentru propria colecție.",
+    "Aromă plăcută și persistentă, recomand cu drag.",
+    "Perfect pentru ocazii speciale, elegant și rafinat.",
+    "Miros subtil, dar persistent și plăcut.",
+    "Un parfum care merită fiecare leu."
   ],
   "product-3": [
-    "Foarte bun, se simte elegant și rafinat.",
-    "Îl port zilnic și persistă suficient de mult.",
-    "Notele de început sunt fresh, apoi devin lemnoase.",
-    "Super elegant, mirosul e plăcut fără să fie agresiv.",
-    "Aromă bogată, parfumul se simte premium.",
-    "Notele de vârf se simt plăcut, baza lemnoasă perfectă.",
-    "Perfect pentru cadou sau pentru ocazii speciale.",
-    "Excelent la evenimente, primesc multe complimente.",
-    "Calitate superioară, merită fiecare bănuț.",
-    "Elegant și persistent, nu se pierde în câteva ore.",
-    "Aroma se dezvoltă frumos și rămâne elegantă.",
-    "Ideal pentru propria colecție, cu siguranță îl recumpăr.",
-    "Se simte luxos, miros plăcut și persistent.",
-    "Note delicate, foarte echilibrate și plăcute.",
-    "Miros subtil dar de efect, elegant și persistent.",
-    "Recomand cu încredere pentru ocazii speciale.",
-    "Foarte bun, îl recomand celor care iubesc parfumurile fine.",
-    "Parfum premium cu aromă complexă și rafinată.",
-    "Ideal pentru serile speciale, sofisticat și elegant.",
+    "Persistență excelentă, aroma elegantă și rafinată.",
+    "Îl port zilnic, aroma rămâne fresh toată ziua.",
+    "Perfect pentru zi și seară, nu deranjează.",
+    "Notele sunt delicate, foarte plăcute și rafinate.",
+    "Un parfum premium, aroma bogată și persistentă.",
+    "Recomand pentru cadou sau pentru tine.",
+    "Foarte bun pentru evenimente speciale și întâlniri.",
+    "Calitate superioară, l-am primit cadou și mi-a plăcut.",
+    "Foarte elegant și persistent, îl voi recumpăra.",
+    "Aroma se dezvoltă frumos pe piele, persistentă.",
+    "Perfect pentru propria colecție sau cadou.",
+    "Se simte luxos și persistent, recomand.",
+    "Note delicate și echilibrate, aroma plăcută.",
+    "Miros subtil, dar persistent și rafinat.",
+    "Foarte elegant și rafinat, recomand cu drag.",
+    "Ideal pentru serile speciale și ocazii elegante.",
+    "Parfum premium, persistent și elegant.",
+    "Foarte bun, aroma rafinată și complexă.",
+    "Se simte de lux, foarte plăcut și persistent."
   ],
   "product-4": [
-    "Aroma e excepțională, persistentă și plăcută.",
-    "Foarte elegant și rafinat, merită încercat.",
-    "Perfect pentru serile speciale, note complexe și armonioase.",
-    "Calitate premium, mirosul rămâne mult timp.",
-    "Primești complimente de fiecare dată când îl porți.",
-    "Mirosul devine mai complex cu timpul, foarte plăcut.",
-    "Notele sunt subtile dar remarcabile, elegant.",
-    "Ideal pentru cadou sau propria colecție.",
-    "Note delicate și plăcute, foarte rafinat.",
+    "Aromă persistentă și rafinată, foarte plăcută.",
+    "Foarte elegant, primești multe complimente.",
+    "Perfect pentru seară, notele sunt bine echilibrate.",
+    "Calitate premium, persistent timp îndelungat.",
+    "Mi-a plăcut mult, aroma se dezvoltă frumos.",
+    "Foarte plăcut și elegant, recomand cu drag.",
+    "Perfect pentru cadou sau colecție.",
+    "Note delicate și plăcute, persistentă pe tot parcursul zilei.",
     "Excelent pentru evenimente speciale și întâlniri.",
-    "Persistență foarte bună pe parcursul zilei.",
-    "Se simte luxos și rafinat, aroma complexă.",
-    "Notele de vârf sunt fresh, baza lemnoasă elegantă.",
-    "Foarte rafinat, aroma persistentă și plăcută.",
-    "Perfect pentru serile speciale, recomand cu drag.",
-    "Aroma bogată, persistentă și sofisticată.",
+    "Persistență extraordinară, se simte premium.",
+    "Se simte luxos, elegant și rafinat.",
+    "Note de vârf fresh, baza lemnoasă persistentă.",
+    "Foarte rafinat, aroma plăcută și elegantă.",
+    "Recomand pentru serile speciale și ocazii.",
+    "Aromă bogată și persistentă, ideală.",
     "Ideal pentru zi și seară, subtil și elegant.",
-    "Foarte bun, elegant și persistent pe parcursul zilei.",
-    "Parfum premium, calitate superioară.",
-    "Note delicate și echilibrate, plăcute.",
-    "Miros subtil dar persistent, foarte rafinat.",
-    "Recomand cu drag, aroma e minunată.",
+    "Foarte bun, elegant și rafinat, persistent.",
+    "Parfum premium, calitate superioară și persistent.",
+    "Note subtile, delicate și plăcute.",
+    "Miros subtil, persistent și rafinat.",
+    "Recomand cu drag, aroma persistentă și plăcută.",
     "Perfect pentru propria colecție sau cadou.",
-    "Excelent, persistent, aroma complexă și echilibrată.",
-    "Foarte rafinat, primești multe complimente.",
+    "Excelent, persistent și rafinat.",
+    "Foarte elegant, primești multe complimente.",
     "Calitate premium, persistent și elegant.",
-    "Note subtile, plăcute și delicate.",
-    "Parfum care impresionează prin aroma sa.",
-    "Ideal pentru serile speciale și ocazii elegante.",
+    "Un parfum care impresionează prin aroma sa.",
+    "Perfect pentru serile speciale și evenimente.",
     "Foarte elegant, aroma persistentă și rafinată.",
-    "Superb, ideal pentru zi și seară.",
+    "Ideal pentru zi și seară, elegant și persistent.",
     "Recomand cu încredere, persistent și elegant.",
-  ],
+    "Un parfum rafinat și persistent, îl recomand."
+  ]
 };
 
 // Mapare ID real -> key din commentsSet
@@ -138,7 +138,7 @@ const productIdToFakeKey: Record<string, string> = {
   "46a8f994-7a21-48c4-acd2-5dd97e06d544": "product-4",
 };
 
-// Generează recenzii fake unice
+// Generează recenzii fake unice cu date random
 const makeFakeReviewsFor = (productId: string): Review[] => {
   const fakeKey = productIdToFakeKey[productId] || "product-1";
   const selectedComments = commentsSet[fakeKey] || [];
@@ -161,7 +161,7 @@ const makeFakeReviewsFor = (productId: string): Review[] => {
   }).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 };
 
-const Reviews = ({ productId }: ReviewsProps) => {
+const Reviews = ({ productId, onReviewsChange }: ReviewsProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
@@ -180,9 +180,22 @@ const Reviews = ({ productId }: ReviewsProps) => {
       const fake = makeFakeReviewsFor(productId);
       const combined = [...real, ...fake].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
       setReviews(combined);
+
+      // actualizează Product.tsx cu număr și medie
+      if (onReviewsChange) {
+        const totalCount = combined.length;
+        const avgRating = +(combined.reduce((sum, r) => sum + r.rating, 0) / totalCount).toFixed(1);
+        onReviewsChange(totalCount, avgRating);
+      }
     } catch (err) {
       console.error(err);
-      setReviews(makeFakeReviewsFor(productId));
+      const fake = makeFakeReviewsFor(productId);
+      setReviews(fake);
+      if (onReviewsChange) {
+        const totalCount = fake.length;
+        const avgRating = +(fake.reduce((sum, r) => sum + r.rating, 0) / totalCount).toFixed(1);
+        onReviewsChange(totalCount, avgRating);
+      }
     } finally {
       setLoading(false);
     }
@@ -208,7 +221,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
       setName("");
       setComment("");
       setRating(5);
-      fetchReviews();
+      fetchReviews(); // refresh recenzii după adăugare
     } catch (err) {
       console.error(err);
       toast.error("Eroare la trimitere.");
@@ -222,7 +235,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
         <Input placeholder="Nume" value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
         <Textarea placeholder="Comentariu" value={comment} onChange={(e) => setComment(e.target.value)} className="mb-2" />
         <div className="flex items-center space-x-2 mb-2">
-          {[1, 2, 3, 4, 5].map((star) => (
+          {[1,2,3,4,5].map((star) => (
             <Star
               key={star}
               className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
@@ -232,6 +245,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
         </div>
         <Button onClick={handleSubmit}>Adaugă Recenzie</Button>
       </div>
+
       {loading ? (
         <p className="text-muted-foreground">Se încarcă recenziile...</p>
       ) : reviews.length === 0 ? (
@@ -241,7 +255,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
           {reviews.map((r) => (
             <div key={r.id} className="p-4 border rounded-lg bg-white">
               <div className="flex items-center mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[1,2,3,4,5].map((star) => (
                   <Star
                     key={star}
                     className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}

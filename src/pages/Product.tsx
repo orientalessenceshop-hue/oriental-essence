@@ -36,16 +36,14 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  // ==== Calcul rating & count (combinează recenziile reale din Supabase cu recenziile fake pe care le-ai definit)
-  // Mapare ID-uri produs -> set fake (așa cum ți-ai dorit: 17,22,19,32)
+  // ==== Calcul rating & count (combinează recenziile reale din Supabase cu recenziile fake)
   const fakeCountsById: Record<string, number> = {
-    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17, // Opulent Oud Lattafa
-    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22, // Unique For Men By Khalis
-    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19, // Autobiography Rich Leather
-    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32, // I Am the King
+    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
+    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
+    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19,
+    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32,
   };
 
-  // valori medii fake (poți ajusta la preferință)
   const fakeAvgById: Record<string, number> = {
     "03b05485-1428-4a9b-9fcb-a58e60774bd3": 4.7,
     "46a8f994-7a21-48c4-acd2-5dd97e06d544": 4.6,
@@ -58,19 +56,16 @@ const Product = () => {
       if (!id) return;
 
       try {
-        // preluăm recenziile reale pentru produs
         const { data, error } = await supabase
           .from("reviews")
-          .select("rating, created_at")
+          .select("rating")
           .eq("product_id", id);
 
         if (error) {
           console.error("Error fetching product ratings:", error);
-          // fallback: doar fake
           const fakeCount = fakeCountsById[id] ?? 0;
           const fakeAvg = fakeAvgById[id] ?? 4.6;
-          if (fakeCount > 0) setProductRating({ avg: Number(fakeAvg.toFixed(1)), count: fakeCount });
-          else setProductRating({ avg: 0, count: 0 });
+          setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
           return;
         }
 
@@ -90,13 +85,11 @@ const Product = () => {
         console.error("Error calculating product rating:", err);
         const fakeCount = fakeCountsById[id] ?? 0;
         const fakeAvg = fakeAvgById[id] ?? 4.6;
-        if (fakeCount > 0) setProductRating({ avg: Number(fakeAvg.toFixed(1)), count: fakeCount });
-        else setProductRating({ avg: 0, count: 0 });
+        setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
       }
     };
 
     fetchStats();
-    // Recalculează când se schimbă id (sau când cineva adaugă o recenzie - poți face refresh manual)
   }, [id]);
 
   const handleAddToCart = () => {
@@ -156,7 +149,6 @@ const Product = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Imagine produs modificată */}
             <div className="flex items-center justify-center bg-white rounded-2xl shadow-[var(--shadow-elegant)] p-6">
               <img
                 src={product.image_url || "/placeholder.svg"}
@@ -172,7 +164,6 @@ const Product = () => {
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
 
-                {/* Afișare rating real (dacă există) */}
                 {productRating && productRating.count > 0 ? (
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center">
@@ -192,18 +183,14 @@ const Product = () => {
                 )}
               </div>
 
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-lg text-muted-foreground leading-relaxed">{product.description}</p>
 
               {notes.length > 0 && (
                 <div className="border border-border rounded-lg p-6 bg-muted/30">
                   <h3 className="font-semibold text-lg mb-3">Piramida Olfactivă</h3>
                   <div className="space-y-2">
                     {notes.map((note: string, index: number) => (
-                      <p key={index} className="text-muted-foreground">
-                        {note}
-                      </p>
+                      <p key={index} className="text-muted-foreground">{note}</p>
                     ))}
                   </div>
                 </div>
@@ -211,14 +198,10 @@ const Product = () => {
 
               <div className="border-t border-b border-border py-6">
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-4xl font-bold text-primary">
-                    {product.price} RON
-                  </span>
+                  <span className="text-4xl font-bold text-primary">{product.price} RON</span>
                 </div>
                 {product.stock > 0 ? (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    În stoc: {product.stock} bucăți
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">În stoc: {product.stock} bucăți</p>
                 ) : (
                   <p className="text-sm text-destructive mt-2">Stoc epuizat</p>
                 )}
@@ -237,9 +220,7 @@ const Product = () => {
               <div className="grid grid-cols-3 gap-4 pt-6">
                 <div className="text-center p-4 bg-muted/30 rounded-lg">
                   <p className="text-sm font-semibold">Livrare</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Livrare în 5-7 zile
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Livrare în 5-7 zile</p>
                 </div>
                 <div className="text-center p-4 bg-muted/30 rounded-lg">
                   <p className="text-sm font-semibold">Plată</p>
@@ -255,7 +236,10 @@ const Product = () => {
 
           {/* ✅ Secțiunea de recenzii */}
           <div className="mt-12">
-            <Reviews productId={product.id} />
+            <Reviews
+              productId={product.id}
+              onReviewsChange={(count, avg) => setProductRating({ count, avg })}
+            />
           </div>
         </div>
       </section>
