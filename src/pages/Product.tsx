@@ -36,7 +36,7 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  // ==== Calcul rating & count (combinează recenziile reale din Supabase cu recenziile fake)
+  // Fake rating pentru produse
   const fakeCountsById: Record<string, number> = {
     "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
     "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
@@ -238,7 +238,6 @@ const Product = () => {
           <div className="mt-12">
             <Reviews
               productId={product.id}
-              // 🔹 callback pentru actualizarea rating-ului și count-ului în Product.tsx
               onReviewsChange={(count, avg) => setProductRating({ count, avg })}
             />
           </div>
