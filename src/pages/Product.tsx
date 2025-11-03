@@ -238,6 +238,7 @@ const Product = () => {
           <div className="mt-12">
             <Reviews
               productId={product.id}
+              // 🔹 callback pentru actualizarea rating-ului și count-ului în Product.tsx
               onReviewsChange={(count, avg) => setProductRating({ count, avg })}
             />
           </div>
