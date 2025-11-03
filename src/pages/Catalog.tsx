@@ -14,7 +14,6 @@ import ProductCard from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 
 const Catalog = () => {
-  // 🔹 Forțăm pagina să înceapă de sus de fiecare dată când se încarcă
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -26,7 +25,7 @@ const Catalog = () => {
   const [priceFilter, setPriceFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Obținem produsele din Supabase
+  // Obținem produsele din Supabase
   useEffect(() => {
     const fetchProducts = async () => {
       const { data, error } = await supabase
@@ -46,7 +45,14 @@ const Catalog = () => {
     fetchProducts();
   }, []);
 
-  // 🔹 Aplicăm filtrele
+  // Conversie pentru filtrare cu diacritice
+  const dbCategoryMap: { [key: string]: string } = {
+    "Bărbați": "barbati",
+    "Femei": "femei",
+    "Unisex": "unisex",
+  };
+
+  // Aplicăm filtrele
   useEffect(() => {
     let filtered = [...products];
 
@@ -62,7 +68,7 @@ const Catalog = () => {
     // Filtru categorie
     if (categoryFilter !== "all") {
       filtered = filtered.filter(
-        (product) => product.category === categoryFilter
+        (product) => product.category === dbCategoryMap[categoryFilter]
       );
     }
 
@@ -93,7 +99,7 @@ const Catalog = () => {
         </div>
       </section>
 
-      {/* 🔹 Filtre */}
+      {/* Filtre */}
       <section className="py-8 border-b border-border bg-card">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -116,9 +122,9 @@ const Catalog = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toate Categoriile</SelectItem>
-                <SelectItem value="barbati">Bărbați</SelectItem>
-                <SelectItem value="femei">Femei</SelectItem>
-                <SelectItem value="unisex">Unisex</SelectItem>
+                <SelectItem value="Bărbați">Bărbați</SelectItem>
+                <SelectItem value="Femei">Femei</SelectItem>
+                <SelectItem value="Unisex">Unisex</SelectItem>
               </SelectContent>
             </Select>
 
@@ -138,7 +144,7 @@ const Catalog = () => {
         </div>
       </section>
 
-      {/* 🔹 Lista de produse */}
+      {/* Lista de produse */}
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           {loading ? (
@@ -159,7 +165,7 @@ const Catalog = () => {
                   {filteredProducts.length === 1 ? "produs" : "produse"}
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} {...product} />
                 ))}
