@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
+import Reviews from "@/components/Reviews"; // ✅ importăm componenta de recenzii
 
 const Product = () => {
   const { id } = useParams();
@@ -91,7 +92,7 @@ const Product = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Imagine produs modificată */}
+            {/* Imagine produs */}
             <div className="flex items-center justify-center bg-white rounded-2xl shadow-[var(--shadow-elegant)] p-6">
               <img
                 src={product.image_url || "/placeholder.svg"}
@@ -174,6 +175,9 @@ const Product = () => {
               </div>
             </div>
           </div>
+
+          {/* ✅ Secțiunea de recenzii */}
+          <Reviews productId={product.id} />
         </div>
       </section>
 
