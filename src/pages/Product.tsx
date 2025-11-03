@@ -15,35 +15,29 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [productRating, setProductRating] = useState<{ avg: number; count: number } | null>(null);
 
+  // === Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
-
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("id", id)
         .single();
-
-      if (error) {
-        console.error("Error fetching product:", error);
-      } else {
-        setProduct(data);
-      }
+      if (error) console.error("Error fetching product:", error);
+      else setProduct(data);
       setLoading(false);
     };
-
     fetchProduct();
   }, [id]);
 
-  // === Recenzii fake
+  // === Fake reviews
   const fakeCountsById: Record<string, number> = {
     "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
     "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
     "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19,
     "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32,
   };
-
   const fakeAvgById: Record<string, number> = {
     "03b05485-1428-4a9b-9fcb-a58e60774bd3": 4.7,
     "46a8f994-7a21-48c4-acd2-5dd97e06d544": 4.6,
@@ -51,26 +45,17 @@ const Product = () => {
     "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 4.6,
   };
 
-  // === Fetch rating & count
+  // === Fetch real reviews + combine cu fake
   useEffect(() => {
     const fetchStats = async () => {
       if (!id) return;
-
       try {
         const { data, error } = await supabase
           .from("reviews")
           .select("rating")
           .eq("product_id", id);
 
-        if (error) {
-          console.error("Error fetching product ratings:", error);
-          const fakeCount = fakeCountsById[id] ?? 0;
-          const fakeAvg = fakeAvgById[id] ?? 4.6;
-          setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
-          return;
-        }
-
-        const realArr = (data || []) as Array<{ rating: number }>;
+        const realArr = (data || []) as Array<{ rating?: number }>;
         const realCount = realArr.length;
         const realSum = realArr.reduce((acc, r) => acc + Number(r.rating || 0), 0);
 
@@ -81,15 +66,14 @@ const Product = () => {
         const totalCount = realCount + fakeCount;
         const totalAvg = totalCount === 0 ? 0 : Number(((realSum + fakeSum) / totalCount).toFixed(1));
 
-        setProductRating({ avg: totalAvg, count: totalCount });
+        setProductRating({ count: totalCount, avg: totalAvg });
       } catch (err) {
-        console.error("Error calculating product rating:", err);
+        console.error("Error fetching reviews:", err);
         const fakeCount = fakeCountsById[id] ?? 0;
         const fakeAvg = fakeAvgById[id] ?? 4.6;
-        setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
+        setProductRating({ count: fakeCount, avg: fakeAvg });
       }
     };
-
     fetchStats();
   }, [id]);
 
@@ -105,41 +89,14 @@ const Product = () => {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Se încarcă...</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Produs negăsit</h2>
-            <Link to="/catalog">
-              <Button>Înapoi la Catalog</Button>
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex flex-col"><Navbar /><p>Se încarcă...</p></div>;
+  if (!product) return <div className="min-h-screen flex flex-col"><Navbar /><p>Produs negăsit</p></div>;
 
   const notes = product.notes ? product.notes.split("\n") : [];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           <Link to="/catalog">
@@ -151,11 +108,7 @@ const Product = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="flex items-center justify-center bg-white rounded-2xl shadow-[var(--shadow-elegant)] p-6">
-              <img
-                src={product.image_url || "/placeholder.svg"}
-                alt={product.name}
-                className="max-h-[450px] w-auto object-contain transition-transform duration-300 hover:scale-105"
-              />
+              <img src={product.image_url || "/placeholder.svg"} alt={product.name} className="max-h-[450px] w-auto object-contain transition-transform duration-300 hover:scale-105" />
             </div>
 
             <div className="space-y-6">
@@ -168,15 +121,12 @@ const Product = () => {
                 {productRating && productRating.count > 0 ? (
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center">
-                      {[1,2,3,4,5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-                        />
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} className={productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"} />
                       ))}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {productRating?.count ?? 0} recenzii
+                      {productRating?.avg ?? 0} · {productRating?.count ?? 0} recenzii
                     </div>
                   </div>
                 ) : (
@@ -235,16 +185,17 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Secțiunea de recenzii */}
+          {/* Secțiunea Reviews */}
           <div className="mt-12">
             <Reviews
               productId={product.id}
-              onReviewsChange={(count, avg) => setProductRating({ count, avg })}
+              onReviewsChange={(count, avg) => {
+                if (count != null && avg != null) setProductRating({ count, avg });
+              }}
             />
           </div>
         </div>
       </section>
-
       <Footer />
     </div>
   );
