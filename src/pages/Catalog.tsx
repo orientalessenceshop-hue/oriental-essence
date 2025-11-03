@@ -30,7 +30,7 @@ const Catalog = () => {
     const fetchProducts = async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, reviews(*)") // adăugăm recenziile
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -45,7 +45,6 @@ const Catalog = () => {
     fetchProducts();
   }, []);
 
-  // Conversie pentru filtrare cu diacritice
   const dbCategoryMap: { [key: string]: string } = {
     "Bărbați": "barbati",
     "Femei": "femei",
@@ -103,7 +102,6 @@ const Catalog = () => {
       <section className="py-8 border-b border-border bg-card">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4">
-            {/* Căutare */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
@@ -115,7 +113,6 @@ const Catalog = () => {
               />
             </div>
 
-            {/* Filtru categorie */}
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full md:w-48 border-gold focus:ring-gold">
                 <SelectValue placeholder="Categorie" />
@@ -128,7 +125,6 @@ const Catalog = () => {
               </SelectContent>
             </Select>
 
-            {/* Filtru preț */}
             <Select value={priceFilter} onValueChange={setPriceFilter}>
               <SelectTrigger className="w-full md:w-48 border-gold focus:ring-gold">
                 <SelectValue placeholder="Preț" />

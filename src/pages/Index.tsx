@@ -15,9 +15,9 @@ const Index = () => {
     const fetchFeaturedProducts = async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, reviews(*)") // adăugăm recenziile
         .eq("featured", true)
-        .limit(4); // afișăm 4 produse
+        .limit(4);
 
       if (error) {
         console.error("Error fetching featured products:", error);
