@@ -36,29 +36,67 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  // fetch rating stats for this product
+  // ==== Calcul rating & count (combinează recenziile reale din Supabase cu recenziile fake pe care le-ai definit)
+  // Mapare ID-uri produs -> set fake (așa cum ți-ai dorit: 17,22,19,32)
+  const fakeCountsById: Record<string, number> = {
+    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17, // Opulent Oud Lattafa
+    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22, // Unique For Men By Khalis
+    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19, // Autobiography Rich Leather
+    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32, // I Am the King
+  };
+
+  // valori medii fake (poți ajusta la preferință)
+  const fakeAvgById: Record<string, number> = {
+    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 4.7,
+    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 4.6,
+    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 4.5,
+    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 4.6,
+  };
+
   useEffect(() => {
     const fetchStats = async () => {
       if (!id) return;
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("rating")
-        .eq("product_id", id);
 
-      if (error) {
-        console.error("Error fetching product ratings:", error);
-        return;
+      try {
+        // preluăm recenziile reale pentru produs
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("rating, created_at")
+          .eq("product_id", id);
+
+        if (error) {
+          console.error("Error fetching product ratings:", error);
+          // fallback: doar fake
+          const fakeCount = fakeCountsById[id] ?? 0;
+          const fakeAvg = fakeAvgById[id] ?? 4.6;
+          if (fakeCount > 0) setProductRating({ avg: Number(fakeAvg.toFixed(1)), count: fakeCount });
+          else setProductRating({ avg: 0, count: 0 });
+          return;
+        }
+
+        const realArr = (data || []) as Array<{ rating: number }>;
+        const realCount = realArr.length;
+        const realSum = realArr.reduce((acc, r) => acc + Number(r.rating || 0), 0);
+
+        const fakeCount = fakeCountsById[id] ?? 0;
+        const fakeAvg = fakeAvgById[id] ?? 4.6;
+        const fakeSum = fakeAvg * fakeCount;
+
+        const totalCount = realCount + fakeCount;
+        const totalAvg = totalCount === 0 ? 0 : Number(((realSum + fakeSum) / totalCount).toFixed(1));
+
+        setProductRating({ avg: totalAvg, count: totalCount });
+      } catch (err) {
+        console.error("Error calculating product rating:", err);
+        const fakeCount = fakeCountsById[id] ?? 0;
+        const fakeAvg = fakeAvgById[id] ?? 4.6;
+        if (fakeCount > 0) setProductRating({ avg: Number(fakeAvg.toFixed(1)), count: fakeCount });
+        else setProductRating({ avg: 0, count: 0 });
       }
-      const arr = data || [];
-      if (arr.length === 0) {
-        setProductRating({ avg: 0, count: 0 });
-        return;
-      }
-      const sum = arr.reduce((acc: number, r: any) => acc + Number(r.rating || 0), 0);
-      setProductRating({ avg: Number((sum / arr.length).toFixed(1)), count: arr.length });
     };
 
     fetchStats();
+    // Recalculează când se schimbă id (sau când cineva adaugă o recenzie - poți face refresh manual)
   }, [id]);
 
   const handleAddToCart = () => {
@@ -118,7 +156,7 @@ const Product = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Imagine produs */}
+            {/* Imagine produs modificată */}
             <div className="flex items-center justify-center bg-white rounded-2xl shadow-[var(--shadow-elegant)] p-6">
               <img
                 src={product.image_url || "/placeholder.svg"}
@@ -139,7 +177,10 @@ const Product = () => {
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center">
                       {[1,2,3,4,5].map((s) => (
-                        <Star key={s} className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
+                        <Star
+                          key={s}
+                          className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
+                        />
                       ))}
                     </div>
                     <div className="text-sm text-muted-foreground">
@@ -160,7 +201,9 @@ const Product = () => {
                   <h3 className="font-semibold text-lg mb-3">Piramida Olfactivă</h3>
                   <div className="space-y-2">
                     {notes.map((note: string, index: number) => (
-                      <p key={index} className="text-muted-foreground">{note}</p>
+                      <p key={index} className="text-muted-foreground">
+                        {note}
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -168,7 +211,9 @@ const Product = () => {
 
               <div className="border-t border-b border-border py-6">
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-4xl font-bold text-primary">{product.price} RON</span>
+                  <span className="text-4xl font-bold text-primary">
+                    {product.price} RON
+                  </span>
                 </div>
                 {product.stock > 0 ? (
                   <p className="text-sm text-muted-foreground mt-2">
@@ -188,6 +233,23 @@ const Product = () => {
                 <ShoppingCart className="mr-2 h-6 w-6" />
                 Adaugă în Coș
               </Button>
+
+              <div className="grid grid-cols-3 gap-4 pt-6">
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-sm font-semibold">Livrare</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Livrare în 5-7 zile
+                  </p>
+                </div>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-sm font-semibold">Plată</p>
+                  <p className="text-xs text-muted-foreground mt-1">Ramburs</p>
+                </div>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-sm font-semibold">Original</p>
+                  <p className="text-xs text-muted-foreground mt-1">100%</p>
+                </div>
+              </div>
             </div>
           </div>
 
