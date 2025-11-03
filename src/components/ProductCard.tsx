@@ -13,7 +13,7 @@ interface ProductCardProps {
   image_url?: string;
   category: string;
   reviewsCount?: number;
-  rating?: number | undefined;
+  rating?: number;
 }
 
 const ProductCard = ({
@@ -33,18 +33,13 @@ const ProductCard = ({
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  // Dacă nu există rating real, afișăm un rating generat (pentru aspect)
-  const displayRating =
-    rating ?? Math.round((Math.random() * (5 - 4) + 4) * 10) / 10;
-
-  // Calcul stele pline și half star
+  const displayRating = rating ?? +(Math.random() * (5 - 4) + 4).toFixed(1);
   const fullStars = Math.floor(displayRating);
   const halfStar = displayRating - fullStars >= 0.5;
 
   return (
     <Link to={`/product/${id}`}>
       <Card className="card-elegant h-full overflow-hidden group cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
-        {/* Imagine */}
         <div className="aspect-square overflow-hidden relative flex items-center justify-center bg-white">
           <img
             src={image_url || "/placeholder.svg"}
@@ -56,28 +51,19 @@ const ProductCard = ({
           </div>
         </div>
 
-        {/* Detalii produs */}
         <CardContent className="p-6">
           <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
             {name}
           </h3>
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-            {description}
-          </p>
-
-          {/* Rating */}
+          <p className="text-muted-foreground text-sm line-clamp-2 mb-4">{description}</p>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-1">
               {[...Array(fullStars)].map((_, i) => (
                 <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               ))}
-              {halfStar && (
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-300" />
-              )}
+              {halfStar && <Star className="h-4 w-4 text-yellow-500 fill-yellow-300" />}
               <span className="text-sm font-semibold">{displayRating}</span>
-              <span className="text-muted-foreground text-sm">
-                ({reviewsCount})
-              </span>
+              <span className="text-muted-foreground text-sm">({reviewsCount})</span>
             </div>
             <span className="text-2xl font-bold text-primary transition-colors group-hover:text-yellow-600">
               {price} RON
@@ -85,7 +71,6 @@ const ProductCard = ({
           </div>
         </CardContent>
 
-        {/* Buton adaugă în coș */}
         <CardFooter className="p-6 pt-0">
           <Button
             onClick={handleAddToCart}

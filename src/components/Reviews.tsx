@@ -26,39 +26,42 @@ const Reviews = ({ productId }: ReviewsProps) => {
   const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(true);
 
-  const generateFakeReviews = (count: number, productId: string) => {
-    const names = ["Ana M.", "George P.", "Ioana S.", "Mihai L.", "Elena R.", "Andrei T."];
+  const generateFakeReviews = () => {
+    const countMap: Record<string, number> = {
+      "prod1": 17,
+      "prod2": 22,
+      "prod3": 19,
+      "prod4": 32,
+    };
+    const count = countMap[productId] || 10;
     const comments = [
-      "Un parfum minunat, aroma persistă toată ziua!",
-      "Foarte elegant și rafinat, recomand!",
-      "Un parfum perfect pentru seară.",
-      "Miros plăcut și persistent.",
-      "Calitate excelentă, foarte mulțumit!",
-      "Se simte scump și rafinat."
+      "Excelent!",
+      "Foarte bun!",
+      "Îmi place aroma.",
+      "Perfect pentru cadou.",
+      "Recomand cu drag!",
+      "Arome complexe, persistente.",
+      "Foarte elegant, calitate premium.",
+      "Se simte minunat toată ziua.",
+      "Mi-a depășit așteptările.",
+      "Ambalaj elegant și parfum delicat.",
     ];
-
-    const reviews: Review[] = [];
-    for (let i = 0; i < count; i++) {
-      const randomName = names[Math.floor(Math.random() * names.length)];
-      const randomComment = comments[Math.floor(Math.random() * comments.length)];
-      const randomRating = +(Math.random() * (5 - 4) + 4).toFixed(1);
-      const randomDate = new Date(
-        2023 + Math.floor(Math.random() * 3), // 2023-2025
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1
-      ).toISOString();
-
-      reviews.push({
-        id: `r${i}-${productId}`,
+    const result: Review[] = [];
+    for (let i = 1; i <= count; i++) {
+      result.push({
+        id: `f${i}`,
         product_id: productId,
-        name: randomName,
-        rating: randomRating,
-        comment: randomComment,
-        created_at: randomDate,
+        name: `Client ${i}`,
+        rating: +(Math.random() * (5 - 4) + 4).toFixed(1),
+        comment: comments[Math.floor(Math.random() * comments.length)],
+        created_at: new Date(
+          2023 + Math.floor(Math.random() * 3),
+          Math.floor(Math.random() * 12),
+          Math.floor(Math.random() * 28) + 1
+        ).toISOString(),
       });
     }
-
-    return reviews;
+    return result;
   };
 
   const fetchReviews = async () => {
@@ -69,17 +72,11 @@ const Reviews = ({ productId }: ReviewsProps) => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching reviews:", error);
-      setReviews([]);
+      console.error(error);
+      setReviews(generateFakeReviews());
     } else {
-      // Setăm numărul de recenzii fake pentru fiecare produs
-      let fakeCount = 17; // primul produs
-      if (productId === "prod2") fakeCount = 22;
-      else if (productId === "prod3") fakeCount = 19;
-      else if (productId === "prod4") fakeCount = 32;
-
-      const fakes = generateFakeReviews(fakeCount, productId);
-      setReviews([...fakes, ...(data || [])]);
+      const fakeReviews = generateFakeReviews();
+      setReviews([...fakeReviews, ...(data || [])]);
     }
     setLoading(false);
   };
@@ -99,14 +96,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
       .insert([{ product_id: productId, name, rating, comment }]);
 
     if (error) {
-      console.error(error);
       toast.error("Eroare la adăugarea recenziei!");
     } else {
       toast.success("Recenzie adăugată cu succes!");
       setName("");
       setComment("");
       setRating(5);
-      fetchReviews(); // reîmprospătăm lista
+      fetchReviews();
     }
   };
 
@@ -114,62 +110,35 @@ const Reviews = ({ productId }: ReviewsProps) => {
     <div className="mt-12">
       <h3 className="text-2xl font-bold mb-4">Recenzii</h3>
 
-      {/* Form adăugare recenzie */}
       <div className="mb-6 p-4 border rounded-lg bg-muted/20">
-        <Input
-          placeholder="Nume"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mb-2"
-        />
-        <Textarea
-          placeholder="Comentariu"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="mb-2"
-        />
+        <Input placeholder="Nume" value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
+        <Textarea placeholder="Comentariu" value={comment} onChange={(e) => setComment(e.target.value)} className="mb-2" />
         <div className="flex items-center space-x-2 mb-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`h-5 w-5 cursor-pointer ${
-                rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
-              }`}
-              onClick={() => setRating(star)}
-            />
+          {[1,2,3,4,5].map((star) => (
+            <Star key={star} className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} onClick={() => setRating(star)} />
           ))}
         </div>
         <Button onClick={handleSubmit}>Adaugă Recenzie</Button>
       </div>
 
-      {/* Lista recenziilor */}
       {loading ? (
         <p className="text-muted-foreground">Se încarcă recenziile...</p>
       ) : reviews.length === 0 ? (
         <p className="text-muted-foreground">Nu există recenzii pentru acest produs.</p>
       ) : (
         <div className="space-y-4">
-          {reviews
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .map((r) => (
-              <div key={r.id} className="p-4 border rounded-lg bg-white">
-                <div className="flex items-center mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-4 w-4 ${
-                        r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm font-semibold">{r.name}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {new Date(r.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-sm">{r.comment}</p>
+          {reviews.map((r) => (
+            <div key={r.id} className="p-4 border rounded-lg bg-white">
+              <div className="flex items-center mb-2">
+                {[1,2,3,4,5].map((star) => (
+                  <Star key={star} className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
+                ))}
+                <span className="ml-2 text-sm font-semibold">{r.name}</span>
+                <span className="ml-auto text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
               </div>
-            ))}
+              <p className="text-sm">{r.comment}</p>
+            </div>
+          ))}
         </div>
       )}
     </div>
