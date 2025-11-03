@@ -7,15 +7,41 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
-import Reviews from "@/components/Reviews"; // importăm componenta de recenzii
+import Reviews from "@/components/Reviews";
 
 const Product = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [productRating, setProductRating] = useState<{ avg: number; count: number } | null>(null);
 
-  // ==== Fake reviews
+  // ✅ Inițializare corectă, nu mai e undefined
+  const [productRating, setProductRating] = useState<{ avg: number; count: number }>({
+    avg: 0,
+    count: 0,
+  });
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching product:", error);
+      } else {
+        setProduct(data);
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // ==== Fake counts și average
   const fakeCountsById: Record<string, number> = {
     "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
     "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
@@ -30,35 +56,24 @@ const Product = () => {
     "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 4.6,
   };
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!id) return;
-
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) console.error("Error fetching product:", error);
-      else setProduct(data);
-
-      setLoading(false);
-    };
-
-    fetchProduct();
-  }, [id]);
-
-  // ==== Fetch initial product rating (fake + real)
+  // ==== Fetch rating și count, combinat real + fake
   useEffect(() => {
     const fetchStats = async () => {
       if (!id) return;
 
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("reviews")
           .select("rating")
           .eq("product_id", id);
+
+        if (error) {
+          console.error("Error fetching product ratings:", error);
+          const fakeCount = fakeCountsById[id] ?? 0;
+          const fakeAvg = fakeAvgById[id] ?? 4.6;
+          setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
+          return;
+        }
 
         const realArr = (data || []) as Array<{ rating: number }>;
         const realCount = realArr.length;
@@ -85,14 +100,12 @@ const Product = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image_url: product.image_url,
     });
-
     toast.success(`${product.name} adăugat în coș!`);
     window.dispatchEvent(new Event("cartUpdated"));
   };
@@ -157,10 +170,11 @@ const Product = () => {
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
 
-                {productRating && productRating.count > 0 ? (
+                {/* ✅ Afișăm rating și count */}
+                {productRating.count > 0 ? (
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center">
-                      {[1, 2, 3, 4, 5].map((s) => (
+                      {[1,2,3,4,5].map((s) => (
                         <Star
                           key={s}
                           className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
@@ -227,7 +241,7 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Secțiunea de recenzii */}
+          {/* ✅ Reviews cu callback */}
           <div className="mt-12">
             <Reviews
               productId={product.id}
