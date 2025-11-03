@@ -30,7 +30,6 @@ const romanianNames = [
 
 // Comentarii variate
 const commentsSet: Record<string, string[]> = {
-  // Produs 1 - 17 recenzii
   "product-1": [
     "Excelent! Aroma rămâne toată ziua. 🌸",
     "Foarte elegant și rafinat, primești multe complimente! 👌",
@@ -50,7 +49,6 @@ const commentsSet: Record<string, string[]> = {
     "Un parfum premium cu adevărat, elegant.",
     "Perfect pentru propria colecție. 🌟",
   ],
-  // Produs 2 - 22 recenzii
   "product-2": [
     "Aromă intensă și sofisticată. 😍",
     "Un parfum minunat, recomand cu drag!",
@@ -75,7 +73,6 @@ const commentsSet: Record<string, string[]> = {
     "Ideal pentru serile speciale și evenimente.",
     "Aromă echilibrată, nu deranjantă, plăcută.",
   ],
-  // Produs 3 - 19 recenzii
   "product-3": [
     "Foarte bun, persistent și elegant.",
     "Îl folosesc zilnic, aroma rămâne fresh.",
@@ -97,7 +94,6 @@ const commentsSet: Record<string, string[]> = {
     "Parfum premium, aroma rafinată și complexă.",
     "Ideal pentru serile speciale și ocazii elegante.",
   ],
-  // Produs 4 - 32 recenzii
   "product-4": [
     "Un parfum excepțional, aroma persistentă.",
     "Foarte elegant și rafinat, recomand cu drag!",
@@ -140,7 +136,11 @@ const makeFakeReviewsFor = (productId: string): Review[] => {
   return selectedComments.map((c, i) => {
     const name = romanianNames[i % romanianNames.length] + (i >= romanianNames.length ? ` ${i}` : "");
     const rating = +(Math.random() * (5 - 4) + 4).toFixed(1);
-    const created_at = new Date(2023 + Math.floor(Math.random() * 3), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString();
+    const created_at = new Date(
+      2023 + Math.floor(Math.random() * 3),
+      Math.floor(Math.random() * 12),
+      Math.floor(Math.random() * 28) + 1
+    ).toISOString();
     return {
       id: `fake-${productId}-${i}`,
       product_id: productId,
@@ -162,7 +162,11 @@ const Reviews = ({ productId }: ReviewsProps) => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase.from("reviews").select("*").eq("product_id", productId).order("created_at", { ascending: false });
+      const { data } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("product_id", productId)
+        .order("created_at", { ascending: false });
       const real: Review[] = data || [];
       const fake = makeFakeReviewsFor(productId);
       const combined = [...real, ...fake].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
@@ -185,7 +189,12 @@ const Reviews = ({ productId }: ReviewsProps) => {
       return;
     }
     try {
-      await supabase.from("reviews").insert([{ product_id: productId, name: name.trim(), rating, comment: comment.trim() }]);
+      await supabase.from("reviews").insert([{
+        product_id: productId,
+        name: name.trim(),
+        rating,
+        comment: comment.trim()
+      }]);
       toast.success("Recenzia ta a fost adăugată!");
       setName("");
       setComment("");
@@ -205,7 +214,11 @@ const Reviews = ({ productId }: ReviewsProps) => {
         <Textarea placeholder="Comentariu" value={comment} onChange={(e) => setComment(e.target.value)} className="mb-2" />
         <div className="flex items-center space-x-2 mb-2">
           {[1, 2, 3, 4, 5].map((star) => (
-            <Star key={star} className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} onClick={() => setRating(star)} />
+            <Star
+              key={star}
+              className={`h-5 w-5 cursor-pointer ${rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
+              onClick={() => setRating(star)}
+            />
           ))}
         </div>
         <Button onClick={handleSubmit}>Adaugă Recenzie</Button>
@@ -220,7 +233,10 @@ const Reviews = ({ productId }: ReviewsProps) => {
             <div key={r.id} className="p-4 border rounded-lg bg-white">
               <div className="flex items-center mb-2">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
+                  <Star
+                    key={star}
+                    className={`h-4 w-4 ${r.rating >= star ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
+                  />
                 ))}
                 <span className="ml-2 text-sm font-semibold">{r.name}</span>
                 <span className="ml-auto text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
