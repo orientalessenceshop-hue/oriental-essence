@@ -36,12 +36,12 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  // Fake rating pentru produse
+  // ==== Fake reviews (păstrăm exact valorile inițiale)
   const fakeCountsById: Record<string, number> = {
-    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
-    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
-    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19,
-    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32,
+    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17, // Opulent Oud Lattafa
+    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22, // Unique For Men By Khalis
+    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19, // Autobiography Rich Leather
+    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32, // I Am the King
   };
 
   const fakeAvgById: Record<string, number> = {
@@ -65,27 +65,23 @@ const Product = () => {
           console.error("Error fetching product ratings:", error);
           const fakeCount = fakeCountsById[id] ?? 0;
           const fakeAvg = fakeAvgById[id] ?? 4.6;
-          setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
+          setProductRating({ avg: fakeAvg, count: fakeCount });
           return;
         }
 
         const realArr = (data || []) as Array<{ rating: number }>;
         const realCount = realArr.length;
-        const realSum = realArr.reduce((acc, r) => acc + Number(r.rating || 0), 0);
 
         const fakeCount = fakeCountsById[id] ?? 0;
         const fakeAvg = fakeAvgById[id] ?? 4.6;
-        const fakeSum = fakeAvg * fakeCount;
-
         const totalCount = realCount + fakeCount;
-        const totalAvg = totalCount === 0 ? 0 : Number(((realSum + fakeSum) / totalCount).toFixed(1));
 
-        setProductRating({ avg: totalAvg, count: totalCount });
+        setProductRating({ avg: fakeAvg, count: totalCount }); // ✅ doar count crește, media rămâne fake
       } catch (err) {
         console.error("Error calculating product rating:", err);
         const fakeCount = fakeCountsById[id] ?? 0;
         const fakeAvg = fakeAvgById[id] ?? 4.6;
-        setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
+        setProductRating({ avg: fakeAvg, count: fakeCount });
       }
     };
 
@@ -216,29 +212,17 @@ const Product = () => {
                 <ShoppingCart className="mr-2 h-6 w-6" />
                 Adaugă în Coș
               </Button>
-
-              <div className="grid grid-cols-3 gap-4 pt-6">
-                <div className="text-center p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-semibold">Livrare</p>
-                  <p className="text-xs text-muted-foreground mt-1">Livrare în 5-7 zile</p>
-                </div>
-                <div className="text-center p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-semibold">Plată</p>
-                  <p className="text-xs text-muted-foreground mt-1">Ramburs</p>
-                </div>
-                <div className="text-center p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-semibold">Original</p>
-                  <p className="text-xs text-muted-foreground mt-1">100%</p>
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* ✅ Secțiunea de recenzii */}
+          {/* ✅ Secțiunea de recenzii (fără schimbări la fake reviews) */}
           <div className="mt-12">
             <Reviews
               productId={product.id}
-              onReviewsChange={(count, avg) => setProductRating({ count, avg })}
+              onReviewsChange={(count) => {
+                // Numărul de recenzii se actualizează la adăugare
+                setProductRating((prev) => prev ? { ...prev, count } : { avg: fakeAvgById[id] ?? 4.6, count });
+              }}
             />
           </div>
         </div>
