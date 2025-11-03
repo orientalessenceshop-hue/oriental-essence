@@ -13,8 +13,9 @@ const Product = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [productRating, setProductRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
+  const [productRating, setProductRating] = useState<{ avg: number; count: number } | null>(null);
 
+  // === Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
@@ -23,65 +24,40 @@ const Product = () => {
         .select("*")
         .eq("id", id)
         .single();
-
-      if (error) {
-        console.error("Error fetching product:", error);
-      } else {
-        setProduct(data);
-      }
+      if (error) console.error("Error fetching product:", error);
+      else setProduct(data);
       setLoading(false);
     };
-
     fetchProduct();
   }, [id]);
 
-  // Fake reviews setup
-  const fakeCountsById: Record<string, number> = {
-    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 17,
-    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 22,
-    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 19,
-    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 32,
-  };
-  const fakeAvgById: Record<string, number> = {
-    "03b05485-1428-4a9b-9fcb-a58e60774bd3": 4.7,
-    "46a8f994-7a21-48c4-acd2-5dd97e06d544": 4.6,
-    "345e6ebb-45f4-47be-b13e-e971b9f6121b": 4.5,
-    "02d742fd-9c9e-4032-a6ec-22ee1d0e5879": 4.6,
+  // === Fetch reviews + calculate rating
+  const fetchStats = async () => {
+    if (!id) return;
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("rating")
+      .eq("product_id", id);
+
+    if (!error && data) {
+      const realArr = data as Array<{ rating: number }>;
+      const realCount = realArr.length;
+      const realSum = realArr.reduce((acc, r) => acc + Number(r.rating || 0), 0);
+      const avg = realCount > 0 ? Number((realSum / realCount).toFixed(1)) : 0;
+      setProductRating({ count: realCount, avg });
+    } else {
+      setProductRating({ count: 0, avg: 0 });
+    }
   };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      if (!id) return;
-      try {
-        const { data, error } = await supabase
-          .from("reviews")
-          .select("rating")
-          .eq("product_id", id);
-
-        if (error) {
-          console.error("Error fetching reviews:", error);
-        }
-
-        const realArr = (data || []) as Array<{ rating: number }>;
-        const realCount = realArr.length;
-        const realSum = realArr.reduce((acc, r) => acc + Number(r.rating || 0), 0);
-
-        const fakeCount = fakeCountsById[id] ?? 0;
-        const fakeAvg = fakeAvgById[id] ?? 4.6;
-        const fakeSum = fakeAvg * fakeCount;
-
-        const totalCount = realCount + fakeCount;
-        const totalAvg = totalCount === 0 ? 0 : Number(((realSum + fakeSum) / totalCount).toFixed(1));
-
-        setProductRating({ avg: totalAvg, count: totalCount });
-      } catch (err) {
-        console.error("Error calculating rating:", err);
-        const fakeCount = fakeCountsById[id] ?? 0;
-        const fakeAvg = fakeAvgById[id] ?? 4.6;
-        setProductRating({ avg: fakeCount ? Number(fakeAvg.toFixed(1)) : 0, count: fakeCount });
-      }
-    };
     fetchStats();
+    // Listen for new reviews
+    const listener = (e: CustomEvent) => {
+      if (e.detail.productId === id) fetchStats();
+    };
+    window.addEventListener("reviewAdded", listener as any);
+    return () => window.removeEventListener("reviewAdded", listener as any);
   }, [id]);
 
   const handleAddToCart = () => {
@@ -92,7 +68,7 @@ const Product = () => {
       price: product.price,
       image_url: product.image_url,
     });
-    toast.success(`${product?.name ?? "Produs"} adăugat în coș!`);
+    toast.success(`${product.name} adăugat în coș!`);
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
@@ -125,12 +101,11 @@ const Product = () => {
     );
   }
 
-  const notes = product.notes?.split("\n") ?? [];
+  const notes = product.notes ? product.notes.split("\n") : [];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           <Link to="/catalog">
@@ -141,34 +116,40 @@ const Product = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="flex items-center justify-center bg-white rounded-2xl shadow-[var(--shadow-elegant)] p-6">
+            {/* Product image */}
+            <div className="flex items-center justify-center bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow">
               <img
-                src={product.image_url ?? "/placeholder.svg"}
+                src={product.image_url || "/placeholder.svg"}
                 alt={product.name}
                 className="max-h-[450px] w-auto object-contain transition-transform duration-300 hover:scale-105"
               />
             </div>
 
+            {/* Product info */}
             <div className="space-y-6">
               <div>
                 <div className="inline-block bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                  {product.category ?? "Fără categorie"}
+                  {product.category}
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
 
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star
-                        key={s}
-                        className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-                      />
-                    ))}
+                {productRating && productRating.count > 0 ? (
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center">
+                      {[1,2,3,4,5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`h-4 w-4 ${productRating.avg >= s ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {productRating.avg} · {productRating.count} recenzii
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {productRating.count ?? 0} recenzii
-                  </div>
-                </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground mb-4">Fără recenzii încă</div>
+                )}
               </div>
 
               <p className="text-lg text-muted-foreground leading-relaxed">{product.description}</p>
@@ -177,7 +158,7 @@ const Product = () => {
                 <div className="border border-border rounded-lg p-6 bg-muted/30">
                   <h3 className="font-semibold text-lg mb-3">Piramida Olfactivă</h3>
                   <div className="space-y-2">
-                    {notes.map((note, index) => (
+                    {notes.map((note: string, index: number) => (
                       <p key={index} className="text-muted-foreground">{note}</p>
                     ))}
                   </div>
@@ -222,13 +203,8 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Reviews */}
-          <div className="mt-12">
-            <Reviews
-              productId={product.id}
-              onReviewsChange={(count, avg) => setProductRating({ count, avg })}
-            />
-          </div>
+          {/* Reviews section */}
+          <Reviews productId={product.id} />
         </div>
       </section>
 
