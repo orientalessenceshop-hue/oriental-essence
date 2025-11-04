@@ -39,15 +39,15 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFF8F2]"> {/* background mai elegant */}
+    <div className="min-h-screen flex flex-col bg-[#FAF6F0]"> {/* fundal mai elegant */}
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-[#FDF6F0] via-[#FFE8D6] to-[#FFD9B3]">
+      <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-[#FFF8F2] via-[#FFEDE0] to-[#FFDAB3]">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1600')] bg-cover bg-center opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6 text-[#5A3E36]">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-[#5A3E36]">
               Descoperiți Esența Orientului
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-[#5A3E36]/90">
@@ -55,7 +55,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/catalog">
-                <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white text-lg px-8 py-6 shadow-lg transition">
+                <Button size="lg" className="btn-gold text-lg px-8 py-6">
                   Explorează Colecția
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -63,14 +63,14 @@ const Index = () => {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#FFF8F2] to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#FAF6F0] to-transparent"></div>
       </section>
 
       {/* Featured Products */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif font-bold mb-4 text-[#5A3E36]">Parfumuri Recomandate</h2>
+            <h2 className="text-4xl font-bold mb-4 text-[#5A3E36]">Parfumuri Recomandate</h2>
             <p className="text-xl text-[#5A3E36]/80 max-w-2xl mx-auto">
               Descoperiți cele mai apreciate parfumuri din colecția noastră
             </p>
@@ -95,8 +95,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-[#FDF1E6]">
+      {/* Features Section mutată sub produse */}
+      <section className="py-16 bg-[#FFF4E6]">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-6 bg-white rounded-2xl shadow-lg">
@@ -131,17 +131,17 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-[#FFDAB9] to-[#FFC48C]">
+      <section className="py-20 bg-gradient-to-r from-[#FFE6D0] to-[#FFD1A3]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-serif font-bold mb-6 text-[#5A3E36]">
+            <h2 className="text-4xl font-bold mb-6 text-[#5A3E36]">
               Începeți Călătoria Dvs. Olfactivă
             </h2>
             <p className="text-xl mb-8 text-[#5A3E36]/90">
               Descoperiți aromele care vă definesc personalitatea
             </p>
             <Link to="/catalog">
-              <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white text-lg px-8 py-6 shadow-lg transition">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
                 Explorează Catalog
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
