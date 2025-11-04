@@ -25,7 +25,7 @@ const Index = () => {
         .from("products")
         .select("*")
         .eq("featured", true)
-        .limit(4);
+        .limit(4); // afișăm 4 produse
 
       if (error) {
         console.error("Error fetching featured products:", error);
@@ -43,14 +43,14 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-secondary via-accent to-primary">
+      <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-[#f4f1ee] via-[#ede3d9] to-[#f8f4f0]">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=1600')] bg-cover bg-center opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-secondary-foreground">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-[#3c3c3c]">
               Descoperiți Esența Orientului
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-secondary-foreground/90">
+            <p className="text-xl md:text-2xl mb-8 text-[#555555]/90">
               Parfumuri arabești autentice, create pentru momente de neuitat
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -81,7 +81,7 @@ const Index = () => {
               <p className="text-muted-foreground">Se încarcă produsele...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-4 gap-6">
               {featuredProducts.map((product) => {
                 const rev = simulatedReviews[product.id] || { count: 0, rating: 4.7 };
                 return (
@@ -104,13 +104,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section mutată sub produse */}
-      <section className="py-16 bg-muted/30">
+      {/* Features Section moved under products */}
+      <section className="py-16 bg-[#f5f5f5]">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#d9cba3]/20 mb-4">
+                <Sparkles className="h-8 w-8 text-[#b87e2d]" />
               </div>
               <h3 className="text-xl font-bold mb-2">Calitate Premium</h3>
               <p className="text-muted-foreground">
@@ -118,8 +118,8 @@ const Index = () => {
               </p>
             </div>
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Award className="h-8 w-8 text-primary" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#d9cba3]/20 mb-4">
+                <Award className="h-8 w-8 text-[#b87e2d]" />
               </div>
               <h3 className="text-xl font-bold mb-2">Autenticitate</h3>
               <p className="text-muted-foreground">
@@ -127,8 +127,8 @@ const Index = () => {
               </p>
             </div>
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Shield className="h-8 w-8 text-primary" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#d9cba3]/20 mb-4">
+                <Shield className="h-8 w-8 text-[#b87e2d]" />
               </div>
               <h3 className="text-xl font-bold mb-2">Livrare Sigură</h3>
               <p className="text-muted-foreground">
@@ -140,13 +140,13 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-accent to-primary">
+      <section className="py-20 bg-gradient-to-r from-[#d9cba3] to-[#b87e2d]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-6 text-accent-foreground">
+            <h2 className="text-4xl font-bold mb-6 text-white">
               Începeți Călătoria Dvs. Olfactivă
             </h2>
-            <p className="text-xl mb-8 text-accent-foreground/90">
+            <p className="text-xl mb-8 text-white/90">
               Descoperiți aromele care vă definesc personalitatea
             </p>
             <Link to="/catalog">
