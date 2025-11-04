@@ -28,6 +28,7 @@ export default async function handler(req, res) {
       )
       .join("");
 
+    // === 📦 Trimite email către client ===
     await transporter.sendMail({
       from: `"Oriental Essence" <${process.env.SMTP_USER}>`,
       to: email,
@@ -43,6 +44,28 @@ export default async function handler(req, res) {
         <p><strong>Observații:</strong> ${notes || "—"}</p>
         <br>
         <p>Echipa Oriental Essence</p>
+      `,
+    });
+
+    // === 💌 Trimite o copie către tine (adminul magazinului) ===
+    await transporter.sendMail({
+      from: `"Oriental Essence - Comenzi" <${process.env.SMTP_USER}>`,
+      to: process.env.ADMIN_EMAIL, // adresa ta unde vrei să primești comenzile
+      subject: `📦 Comandă nouă #${orderNumber} de la ${name}`,
+      html: `
+        <h2>Comandă nouă primită!</h2>
+        <p><strong>Nume client:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Telefon:</strong> ${phone}</p>
+        <p><strong>Adresă:</strong> ${address}</p>
+        <p><strong>Număr comandă:</strong> ${orderNumber}</p>
+        <h3>Produse comandate:</h3>
+        ${orderItems}
+        <p><strong>Total:</strong> ${total.toFixed(2)} RON</p>
+        <p><strong>Observații client:</strong> ${notes || "—"}</p>
+        <hr />
+        <p>📩 Email primit automat de la website-ul Oriental Essence</p>
+        <p><i>${new Date().toLocaleString("ro-RO")}</i></p>
       `,
     });
 
